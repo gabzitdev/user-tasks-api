@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-public class UserTaskController {
+public class TaskController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/api/users/{id}/tasks")
@@ -33,13 +33,13 @@ public class UserTaskController {
     }
 
     @GetMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<TaskResponse> getUserTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
+    public ResponseEntity<TaskResponse> getTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
         LOG.info("[getTask] received request for userId: [{}], taskId: [{}]", userId, taskId);
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @GetMapping("/api/users/{user_id}/tasks")
-    public ResponseEntity<List<TaskResponse>> getUserTasks(@PathVariable("user_id") String userId) {
+    public ResponseEntity<List<TaskResponse>> getTasks(@PathVariable("user_id") String userId) {
         LOG.info("[getUserTasks] received request for userId: [{}]", userId);
         throw new UnsupportedOperationException("Method not implemented yet.");
     }

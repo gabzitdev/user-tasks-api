@@ -10,7 +10,7 @@
 
 	<groupId>com.ntokozodev</groupId>
 	<artifactId>user-tasks-api</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>user-tasks-api</name>
 	<description>CCi Client Applications Assessments</description>
 
