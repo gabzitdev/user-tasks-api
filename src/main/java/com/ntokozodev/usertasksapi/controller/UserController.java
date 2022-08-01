@@ -1,5 +1,6 @@
 package com.ntokozodev.usertasksapi.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -16,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntokozodev.usertasksapi.exception.EntityDuplicateException;
-import com.ntokozodev.usertasksapi.model.task.TaskResponse;
+import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
+import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserResponse;
@@ -40,45 +42,130 @@ public class UserController {
 
         try {
             var user = userService.createUser(request);
-            var response = new UserResponse();
-
-            response.setId(user.getId());
-            response.setFirst_name(user.getFirst_name());
-            response.setLast_name(user.getLast_name());
-            response.setUsername(user.getUsername());
-
+            var response = createResponse(user);
+            var body = mapper.writeValueAsString(response);
             var headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
-            var body = mapper.writeValueAsString(response);
-            
+
             return new ResponseEntity<>(body, headers, HttpStatus.CREATED);
         } catch (EntityDuplicateException ex) {
-            var message = String.format("User with username [%s] already exists", request.getUsername());
-            return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+            logException("createUser", ex);
+            return new ResponseEntity<>(String.format("User with username [%s] already exists", request.getUsername()),
+                    HttpStatus.CONFLICT);
         } catch (Exception ex) {
-            var customMessage = "[createUser] exception: { message: {}, type: {} }";
-            LOG.error(customMessage, ex.getMessage(), ex.getClass().getCanonicalName());
-            LOG.error("[createUser] exception", ex);
-
+            logException("createUser", ex);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PutMapping("/api/users/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") String userId, @RequestBody UpdateUserRequest request) {
-        LOG.info("[updateUser] received request for userId: [{}], username: [{}]", userId, request.getUsername());
-        throw new UnsupportedOperationException("Method not implemented yet.");
+    public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UpdateUserRequest request) {
+        LOG.info("[updateUser] received request for userId: [{}]", id);
+
+        try {
+            var user = userService.updateUser(request, parseId(id));
+            var response = createResponse(user);
+            var body = mapper.writeValueAsString(response);
+            var headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        } catch (IllegalArgumentException ex) {
+            logException("updateUser", ex);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (EntityNotFoundException ex) {
+            logException("updateUser", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            logException("updateUser", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/api/users/{id}")
-    public ResponseEntity<TaskResponse> getUser(@PathVariable("id") String userId) {
-        LOG.info("[getUser] received request for userId: [{}]", userId);
-        throw new UnsupportedOperationException("Method not implemented yet.");
+    public ResponseEntity<String> getUserById(@PathVariable("id") String id) {
+        LOG.info("[getUser] received request for Id: [{}]", id);
+
+        try {
+            var userId = parseId(id);
+            var user = userService.getUserById(userId);
+            var response = createResponse(user);
+            var body = mapper.writeValueAsString(response);
+            var headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        } catch (EntityNotFoundException ex) {
+            logException("getUserById", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException ex) {
+            logException("getUserById", ex);
+            return new ResponseEntity<>("Invalid user id", HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (Exception ex) {
+            logException("getUserById", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/api/users/{username}/username")
+    public ResponseEntity<String> getUserByUsername(@PathVariable("username") String username) {
+        LOG.info("[getUserByUsername] received request for username: [{}]", username);
+
+        try {
+            var user = userService.getUserByUsername(username);
+            var response = createResponse(user);
+            var body = mapper.writeValueAsString(response);
+            var headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        } catch (EntityNotFoundException ex) {
+            logException("getUserByUsername", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            logException("getUserByUsername", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/api/users")
     public ResponseEntity<List<UserResponse>> getUsers() {
         LOG.info("[getUsers] received request");
-        throw new UnsupportedOperationException("Method not implemented yet.");
+
+        try {
+            var responses = new ArrayList<UserResponse>();
+            var users = userService.getAllUsers();
+            users.forEach(user -> responses.add(createResponse(user)));
+
+            return new ResponseEntity<>(responses, HttpStatus.OK);
+        } catch (Exception ex) {
+            logException("getUsers", ex);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private UserResponse createResponse(User user) {
+        var response = new UserResponse();
+        response.setId(user.getId());
+        response.setFirst_name(user.getFirst_name());
+        response.setLast_name(user.getLast_name());
+        response.setUsername(user.getUsername());
+
+        return response;
+    }
+
+    private Long parseId(String id) {
+        try {
+            return Long.parseLong(id);
+        } catch (Exception ex) {
+            LOG.info("[parseId] failed invalid Id [{}]", id);
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
+    private void logException(String method, Exception ex) {
+        var message = String.format("[%s] exception: { message: {}, type: {} }", method);
+        LOG.info(message, ex.getMessage(), ex.getClass().getCanonicalName());
+        LOG.error("Exception", ex);
     }
 }
