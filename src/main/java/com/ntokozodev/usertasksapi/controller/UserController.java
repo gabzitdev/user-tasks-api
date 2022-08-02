@@ -1,7 +1,12 @@
 package com.ntokozodev.usertasksapi.controller;
 
+import static com.ntokozodev.usertasksapi.common.Util.logException;
+import static com.ntokozodev.usertasksapi.common.Util.parseId;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +29,6 @@ import com.ntokozodev.usertasksapi.model.user.UserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.UserService;
 
-import javax.validation.Valid;
-
-import static com.ntokozodev.usertasksapi.util.Util.logException;
-import static com.ntokozodev.usertasksapi.util.Util.parseId;
-
 @RestController
 public class UserController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/api/users")
-    public ResponseEntity<String> createUser(@Valid  @RequestBody UserRequest request) {
+    public ResponseEntity<String> createUser(@Valid @RequestBody UserRequest request) {
         LOG.info("[createUser] received request for username: [{}]", request.getUsername());
 
         try {

@@ -1,5 +1,13 @@
 package com.ntokozodev.usertasksapi.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.exception.ServiceException;
 import com.ntokozodev.usertasksapi.model.db.Task;
@@ -8,13 +16,6 @@ import com.ntokozodev.usertasksapi.model.task.TaskRequest;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
 import com.ntokozodev.usertasksapi.repository.TaskRepository;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -36,7 +37,8 @@ public class TaskService {
         try {
             Optional<User> userEntity = userRepository.findById(userId);
             if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(String.format("Couldn't create task no user found for Id [%s]", userId));
+                throw new EntityNotFoundException(
+                        String.format("Couldn't create task no user found for Id [%s]", userId));
             }
 
             var task = new Task();
@@ -55,13 +57,15 @@ public class TaskService {
         }
     }
 
-    public Task updateUserTask(UpdateTaskRequest request, long userId, long taskId) throws ServiceException, EntityNotFoundException {
+    public Task updateUserTask(UpdateTaskRequest request, long userId, long taskId)
+            throws ServiceException, EntityNotFoundException {
         LOG.info("[updateUser] updating task with userId: [{}], taskId: [{}]", userId, taskId);
 
         try {
             Optional<Task> taskEntity = taskRepository.findById(taskId);
             if (taskEntity.isEmpty()) {
-                throw new EntityNotFoundException(String.format("Couldn't update task no task found for Id [%s]", taskId));
+                throw new EntityNotFoundException(
+                        String.format("Couldn't update task no task found for Id [%s]", taskId));
             }
 
             var task = taskEntity.get();
@@ -88,11 +92,13 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(String.format("Error updating task with userId [%s], taskId [%s]", userId, taskId), ex);
+            throw new ServiceException(
+                    String.format("Error updating task with userId [%s], taskId [%s]", userId, taskId), ex);
         }
     }
 
-    public Task getUserTask(long userId, long taskId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
+    public Task getUserTask(long userId, long taskId)
+            throws ServiceException, EntityNotFoundException, IllegalArgumentException {
         LOG.info("[getUserTask] retrieving task taskId: [{}] for userId: [{}]", taskId, userId);
 
         try {
@@ -113,7 +119,8 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(String.format("Error retrieving task with userId [%s] - taskId [%s]", userId, taskId), ex);
+            throw new ServiceException(
+                    String.format("Error retrieving task with userId [%s] - taskId [%s]", userId, taskId), ex);
         }
     }
 
@@ -123,7 +130,8 @@ public class TaskService {
         try {
             Optional<User> userEntity = userRepository.findById(userId);
             if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId));
+                throw new EntityNotFoundException(
+                        String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId));
             }
 
             return taskRepository.findByUser(userEntity.get());
@@ -133,7 +141,8 @@ public class TaskService {
         }
     }
 
-    public void deleteUserTask(long userId, long taskId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
+    public void deleteUserTask(long userId, long taskId)
+            throws ServiceException, EntityNotFoundException, IllegalArgumentException {
         LOG.info("[deleteUserTask] deleting task taskId: [{}] for userId: [{}]", taskId, userId);
 
         try {
@@ -154,7 +163,8 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId), ex);
+            throw new ServiceException(
+                    String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId), ex);
         }
     }
 }

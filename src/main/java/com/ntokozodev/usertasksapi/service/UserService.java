@@ -1,5 +1,15 @@
 package com.ntokozodev.usertasksapi.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
 import com.ntokozodev.usertasksapi.exception.EntityDuplicateException;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.exception.ServiceException;
@@ -7,15 +17,6 @@ import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserRequest;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {

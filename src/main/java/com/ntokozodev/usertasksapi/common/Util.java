@@ -1,11 +1,10 @@
-package com.ntokozodev.usertasksapi.util;
+package com.ntokozodev.usertasksapi.common;
 
-import com.ntokozodev.usertasksapi.controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Util {
-    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
+    private static final Logger LOG = LoggerFactory.getLogger("common.util");
 
     public static void logException(String method, Exception ex) {
         var message = String.format("[%s] exception: { message: {}, type: {} }", method);

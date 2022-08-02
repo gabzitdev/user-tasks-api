@@ -1,5 +1,26 @@
 package com.ntokozodev.usertasksapi.controller;
 
+import static com.ntokozodev.usertasksapi.common.Util.logException;
+import static com.ntokozodev.usertasksapi.common.Util.parseId;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.model.db.Task;
@@ -7,19 +28,6 @@ import com.ntokozodev.usertasksapi.model.task.TaskRequest;
 import com.ntokozodev.usertasksapi.model.task.TaskResponse;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
 import com.ntokozodev.usertasksapi.service.TaskService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.ntokozodev.usertasksapi.util.Util.logException;
-import static com.ntokozodev.usertasksapi.util.Util.parseId;
 
 @RestController
 public class TaskController {
@@ -54,7 +62,8 @@ public class TaskController {
     }
 
     @PutMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<String> updateTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
+    public ResponseEntity<String> updateTask(@PathVariable("user_id") String userId,
+            @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
         LOG.info("[updateUserTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -78,7 +87,8 @@ public class TaskController {
     }
 
     @DeleteMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<String> deleteTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
+    public ResponseEntity<String> deleteTask(@PathVariable("user_id") String userId,
+            @PathVariable("task_id") String taskId) {
         LOG.info("[deleteTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -97,7 +107,8 @@ public class TaskController {
     }
 
     @GetMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<String> getTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
+    public ResponseEntity<String> getTask(@PathVariable("user_id") String userId,
+            @PathVariable("task_id") String taskId) {
         LOG.info("[getTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -113,7 +124,7 @@ public class TaskController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException ex) {
             logException("getTask", ex);
-            return new ResponseEntity<>(ex.getMessage() ,HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (Exception ex) {
             logException("getTask", ex);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
