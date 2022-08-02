@@ -3,13 +3,10 @@ package com.ntokozodev.usertasksapi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.model.db.Task;
-import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.task.TaskRequest;
 import com.ntokozodev.usertasksapi.model.task.TaskResponse;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
-import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.TaskService;
-import com.ntokozodev.usertasksapi.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.ntokozodev.usertasksapi.util.Util.logException;
+import static com.ntokozodev.usertasksapi.util.Util.parseId;
 
 @RestController
 public class TaskController {
@@ -51,12 +51,6 @@ public class TaskController {
         }
     }
 
-    private void logException(String method, Exception ex) {
-        var message = String.format("[%s] exception: { message: {}, type: {} }", method);
-        LOG.info(message, ex.getMessage(), ex.getClass().getCanonicalName());
-        LOG.error("Exception", ex);
-    }
-
     private TaskResponse createResponse(Task task) {
         var response = new TaskResponse();
         response.setId(task.getId());
@@ -65,15 +59,6 @@ public class TaskController {
         response.setDate_time(task.getDate_time());
 
         return response;
-    }
-
-    private Long parseId(String id) {
-        try {
-            return Long.parseLong(id);
-        } catch (Exception ex) {
-            LOG.info("[parseId] failed invalid Id [{}]", id);
-            throw new IllegalArgumentException(ex);
-        }
     }
 
     @PutMapping("/api/users/{user_id}/tasks/{task_id}")

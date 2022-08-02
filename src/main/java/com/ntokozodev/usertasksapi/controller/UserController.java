@@ -24,6 +24,9 @@ import com.ntokozodev.usertasksapi.model.user.UserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.UserService;
 
+import static com.ntokozodev.usertasksapi.util.Util.logException;
+import static com.ntokozodev.usertasksapi.util.Util.parseId;
+
 @RestController
 public class UserController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
@@ -152,20 +155,5 @@ public class UserController {
         response.setUsername(user.getUsername());
 
         return response;
-    }
-
-    private Long parseId(String id) {
-        try {
-            return Long.parseLong(id);
-        } catch (Exception ex) {
-            LOG.info("[parseId] failed invalid Id [{}]", id);
-            throw new IllegalArgumentException(ex);
-        }
-    }
-
-    private void logException(String method, Exception ex) {
-        var message = String.format("[%s] exception: { message: {}, type: {} }", method);
-        LOG.info(message, ex.getMessage(), ex.getClass().getCanonicalName());
-        LOG.error("Exception", ex);
     }
 }
