@@ -24,6 +24,8 @@ import com.ntokozodev.usertasksapi.model.user.UserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.UserService;
 
+import javax.validation.Valid;
+
 import static com.ntokozodev.usertasksapi.util.Util.logException;
 import static com.ntokozodev.usertasksapi.util.Util.parseId;
 
@@ -40,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/api/users")
-    public ResponseEntity<String> createUser(@RequestBody UserRequest request) {
+    public ResponseEntity<String> createUser(@Valid  @RequestBody UserRequest request) {
         LOG.info("[createUser] received request for username: [{}]", request.getUsername());
 
         try {

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static com.ntokozodev.usertasksapi.util.Util.logException;
@@ -31,7 +32,7 @@ public class TaskController {
     }
 
     @PostMapping("/api/users/{id}/tasks")
-    public ResponseEntity<String> createTask(@PathVariable("id") String id, @RequestBody TaskRequest request) {
+    public ResponseEntity<String> createTask(@Valid @RequestBody TaskRequest request, @PathVariable("id") String id) {
         LOG.info("[createTask] received request for Id: [{}], task: [{}]", id, request.getName());
 
         try {
