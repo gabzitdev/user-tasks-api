@@ -51,20 +51,28 @@ public class TaskController {
         }
     }
 
-    private TaskResponse createResponse(Task task) {
-        var response = new TaskResponse();
-        response.setId(task.getId());
-        response.setName(task.getName());
-        response.setDescription(task.getDescription());
-        response.setDate_time(task.getDate_time());
-
-        return response;
-    }
-
     @PutMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
+    public ResponseEntity<String> updateTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
         LOG.info("[updateTask] received request for userId: [{}], taskId: [{}]", userId, taskId);
-        throw new UnsupportedOperationException("Method not implemented yet.");
+
+        try {
+            var task = service.updateTask(request, parseId(userId), parseId(taskId));
+            var response = createResponse(task);
+            var body = mapper.writeValueAsString(response);
+            var headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        } catch (IllegalArgumentException ex) {
+            logException("updateTask", ex);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (EntityNotFoundException ex) {
+            logException("updateTask", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            logException("updateTask", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/api/users/{user_id}/tasks/{task_id}")
@@ -83,5 +91,15 @@ public class TaskController {
     public ResponseEntity<List<TaskResponse>> getTasks(@PathVariable("user_id") String userId) {
         LOG.info("[getUserTasks] received request for userId: [{}]", userId);
         throw new UnsupportedOperationException("Method not implemented yet.");
+    }
+
+    private TaskResponse createResponse(Task task) {
+        var response = new TaskResponse();
+        response.setId(task.getId());
+        response.setName(task.getName());
+        response.setDescription(task.getDescription());
+        response.setDate_time(task.getDate_time());
+
+        return response;
     }
 }

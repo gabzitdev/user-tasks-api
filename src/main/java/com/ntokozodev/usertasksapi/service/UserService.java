@@ -48,7 +48,7 @@ public class UserService {
     }
 
     public User updateUser(UpdateUserRequest request, long userId) throws ServiceException, EntityNotFoundException {
-        LOG.info("[updateUser] updating user: {}", request);
+        LOG.info("[updateUser] updating user with id: [{}]", userId);
 
         try {
             Optional<User> entity = repository.findById(userId);
