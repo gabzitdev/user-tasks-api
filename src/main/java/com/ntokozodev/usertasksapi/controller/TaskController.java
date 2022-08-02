@@ -6,7 +6,6 @@ import com.ntokozodev.usertasksapi.model.db.Task;
 import com.ntokozodev.usertasksapi.model.task.TaskRequest;
 import com.ntokozodev.usertasksapi.model.task.TaskResponse;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
-import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,9 +78,22 @@ public class TaskController {
     }
 
     @DeleteMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<Integer> deleteUserTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
+    public ResponseEntity<String> deleteTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
         LOG.info("[deleteTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
-        throw new UnsupportedOperationException("Method not implemented yet.");
+
+        try {
+            service.deleteUserTask(parseId(userId), parseId(taskId));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (IllegalArgumentException ex) {
+            logException("deleteTask", ex);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (EntityNotFoundException ex) {
+            logException("deleteTask", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            logException("deleteTask", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/api/users/{user_id}/tasks/{task_id}")

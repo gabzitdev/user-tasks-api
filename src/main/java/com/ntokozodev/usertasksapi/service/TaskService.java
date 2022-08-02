@@ -113,7 +113,7 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(String.format("Error retrieving task with userId [%s], taskId [%s]", userId, taskId), ex);
+            throw new ServiceException(String.format("Error retrieving task with userId [%s] - taskId [%s]", userId, taskId), ex);
         }
     }
 
@@ -130,6 +130,31 @@ public class TaskService {
 
         } catch (Exception ex) {
             throw new ServiceException("Error retrieving all user tasks", ex);
+        }
+    }
+
+    public void deleteUserTask(long userId, long taskId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
+        LOG.info("[deleteUserTask] deleting task taskId: [{}] for userId: [{}]", taskId, userId);
+
+        try {
+            Optional<Task> taskEntity = taskRepository.findById(taskId);
+            if (taskEntity.isEmpty()) {
+                throw new EntityNotFoundException(String.format("No task found for Id [%s]", taskId));
+            }
+
+            var task = taskEntity.get();
+            if (task.getUser().getId() != userId) {
+                throw new IllegalArgumentException(String.format("Invalid user for given taskId: [%s]", taskId));
+            }
+
+            taskRepository.delete(task);
+
+        } catch (Exception ex) {
+            if (ex instanceof EntityNotFoundException || ex instanceof IllegalArgumentException) {
+                throw ex;
+            }
+
+            throw new ServiceException(String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId), ex);
         }
     }
 }
