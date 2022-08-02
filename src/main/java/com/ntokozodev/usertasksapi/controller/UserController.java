@@ -92,8 +92,7 @@ public class UserController {
         LOG.info("[getUser] received request for Id: [{}]", id);
 
         try {
-            var userId = parseId(id);
-            var user = userService.getUserById(userId);
+            var user = userService.getUserById(parseId(id));
             var response = createResponse(user);
             var body = mapper.writeValueAsString(response);
             var headers = new HttpHeaders();
