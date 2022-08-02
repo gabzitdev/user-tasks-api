@@ -33,7 +33,7 @@ public class TaskController {
 
     @PostMapping("/api/users/{id}/tasks")
     public ResponseEntity<String> createTask(@Valid @RequestBody TaskRequest request, @PathVariable("id") String id) {
-        LOG.info("[createTask] received request for Id: [{}], task: [{}]", id, request.getName());
+        LOG.info("[createTask] request for Id: [{}] - task: [{}]", id, request.getName());
 
         try {
             var task = service.createTask(request, parseId(id));
@@ -54,10 +54,10 @@ public class TaskController {
 
     @PutMapping("/api/users/{user_id}/tasks/{task_id}")
     public ResponseEntity<String> updateTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
-        LOG.info("[updateTask] received request for userId: [{}], taskId: [{}]", userId, taskId);
+        LOG.info("[updateUserTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
-            var task = service.updateTask(request, parseId(userId), parseId(taskId));
+            var task = service.updateUserTask(request, parseId(userId), parseId(taskId));
             var response = createResponse(task);
             var body = mapper.writeValueAsString(response);
             var headers = new HttpHeaders();
@@ -65,32 +65,50 @@ public class TaskController {
 
             return new ResponseEntity<>(body, headers, HttpStatus.OK);
         } catch (IllegalArgumentException ex) {
-            logException("updateTask", ex);
+            logException("updateUserTask", ex);
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (EntityNotFoundException ex) {
-            logException("updateTask", ex);
+            logException("updateUserTask", ex);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            logException("updateTask", ex);
+            logException("updateUserTask", ex);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/api/users/{user_id}/tasks/{task_id}")
     public ResponseEntity<Integer> deleteUserTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
-        LOG.info("[deleteTask] received delete request for userId: [{}], taskId: [{}]", userId, taskId);
+        LOG.info("[deleteTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @GetMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<TaskResponse> getTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
-        LOG.info("[getTask] received request for userId: [{}], taskId: [{}]", userId, taskId);
-        throw new UnsupportedOperationException("Method not implemented yet.");
+    public ResponseEntity<String> getTask(@PathVariable("user_id") String userId, @PathVariable("task_id") String taskId) {
+        LOG.info("[getTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
+
+        try {
+            var task = service.getUserTask(parseId(userId), parseId(taskId));
+            var response = createResponse(task);
+            var body = mapper.writeValueAsString(response);
+            var headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+        } catch (EntityNotFoundException ex) {
+            logException("getTask", ex);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException ex) {
+            logException("getTask", ex);
+            return new ResponseEntity<>(ex.getMessage() ,HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (Exception ex) {
+            logException("getTask", ex);
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/api/users/{user_id}/tasks")
     public ResponseEntity<List<TaskResponse>> getTasks(@PathVariable("user_id") String userId) {
-        LOG.info("[getUserTasks] received request for userId: [{}]", userId);
+        LOG.info("[getUserTasks] request for userId: [{}]", userId);
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 

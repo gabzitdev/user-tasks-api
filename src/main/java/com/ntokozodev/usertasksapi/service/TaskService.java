@@ -54,22 +54,20 @@ public class TaskService {
         }
     }
 
-    public Task updateTask(UpdateTaskRequest request, long userId, long taskId) throws ServiceException, EntityNotFoundException {
+    public Task updateUserTask(UpdateTaskRequest request, long userId, long taskId) throws ServiceException, EntityNotFoundException {
         LOG.info("[updateUser] updating task with userId: [{}], taskId: [{}]", userId, taskId);
 
         try {
-            Optional<User> userEntity = userRepository.findById(userId);
-            if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(String.format("Couldn't update task no user found for Id [%s]", userId));
-            }
-
             Optional<Task> taskEntity = taskRepository.findById(taskId);
             if (taskEntity.isEmpty()) {
                 throw new EntityNotFoundException(String.format("Couldn't update task no task found for Id [%s]", taskId));
             }
 
             var task = taskEntity.get();
-            task.setUser(userEntity.get());
+            if (task.getUser().getId() != userId) {
+                throw new ServiceException(String.format("Invalid user for given taskId: [%s]", taskId));
+            }
+
             if (request.getName() != null) {
                 task.setName(request.getName());
             }
@@ -85,11 +83,36 @@ public class TaskService {
             return taskRepository.save(task);
 
         } catch (Exception ex) {
-            if (ex instanceof EntityNotFoundException) {
+            if (ex instanceof EntityNotFoundException || ex instanceof ServiceException) {
                 throw ex;
             }
 
             throw new ServiceException(String.format("Error updating task with userId [%s], taskId [%s]", userId, taskId), ex);
+        }
+    }
+
+    public Task getUserTask(long userId, long taskId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
+        LOG.info("[getUserTask] retrieving task taskId: [{}] for userId: [{}]", taskId, userId);
+
+        try {
+            Optional<Task> taskEntity = taskRepository.findById(taskId);
+            if (taskEntity.isEmpty()) {
+                throw new EntityNotFoundException(String.format("No task found for Id [%s]", taskId));
+            }
+
+            var task = taskEntity.get();
+            if (task.getUser().getId() != userId) {
+                throw new IllegalArgumentException(String.format("Invalid user for given taskId: [%s]", taskId));
+            }
+
+            return task;
+
+        } catch (Exception ex) {
+            if (ex instanceof EntityNotFoundException || ex instanceof IllegalArgumentException) {
+                throw ex;
+            }
+
+            throw new ServiceException(String.format("Error retrieving task with userId [%s], taskId [%s]", userId, taskId), ex);
         }
     }
 }
