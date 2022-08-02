@@ -135,7 +135,7 @@ public class UserController {
 
     @GetMapping("/api/users")
     public ResponseEntity<List<UserResponse>> getUsers() {
-        LOG.info("[getUsers] received request");
+        LOG.info("[getUsers] request");
 
         try {
             var responses = new ArrayList<UserResponse>();

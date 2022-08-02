@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -113,6 +114,22 @@ public class TaskService {
             }
 
             throw new ServiceException(String.format("Error retrieving task with userId [%s], taskId [%s]", userId, taskId), ex);
+        }
+    }
+
+    public List<Task> getAllUserTasks(long userId) throws ServiceException {
+        LOG.info("[getAllUserTasks] request for Id: [{}]", userId);
+
+        try {
+            Optional<User> userEntity = userRepository.findById(userId);
+            if (userEntity.isEmpty()) {
+                throw new EntityNotFoundException(String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId));
+            }
+
+            return taskRepository.findByUser(userEntity.get());
+
+        } catch (Exception ex) {
+            throw new ServiceException("Error retrieving all user tasks", ex);
         }
     }
 }

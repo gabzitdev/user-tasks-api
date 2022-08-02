@@ -6,6 +6,7 @@ import com.ntokozodev.usertasksapi.model.db.Task;
 import com.ntokozodev.usertasksapi.model.task.TaskRequest;
 import com.ntokozodev.usertasksapi.model.task.TaskResponse;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
+import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.ntokozodev.usertasksapi.util.Util.logException;
@@ -108,8 +110,18 @@ public class TaskController {
 
     @GetMapping("/api/users/{user_id}/tasks")
     public ResponseEntity<List<TaskResponse>> getTasks(@PathVariable("user_id") String userId) {
-        LOG.info("[getUserTasks] request for userId: [{}]", userId);
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        LOG.info("[getTasks] request for userId: [{}]", userId);
+
+        try {
+            var responses = new ArrayList<TaskResponse>();
+            var tasks = service.getAllUserTasks(parseId(userId));
+            tasks.forEach(task -> responses.add(createResponse(task)));
+
+            return new ResponseEntity<>(responses, HttpStatus.OK);
+        } catch (Exception ex) {
+            logException("getTasks", ex);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private TaskResponse createResponse(Task task) {
