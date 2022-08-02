@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TaskResponse {
-    private int id;
+    private long id;
     private String name;
     private String description;
     private String date_time;

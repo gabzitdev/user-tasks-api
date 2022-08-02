@@ -10,11 +10,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
+
+@Setter
 @Getter
 @Entity
 @Table(name="tasks") 
-public class Task {
+public class Task implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

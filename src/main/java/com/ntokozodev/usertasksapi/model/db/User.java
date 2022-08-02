@@ -3,6 +3,7 @@ package com.ntokozodev.usertasksapi.model.db;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -19,7 +20,7 @@ import javax.persistence.Table;
 @Setter
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

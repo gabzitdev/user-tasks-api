@@ -43,7 +43,6 @@ public class UserService {
             var message = String.format("User with username [%s] already exists", request.getUsername());
             throw new EntityDuplicateException(message, ex);
         } catch (Exception ex) {
-            LOG.info("[createUser] failed with username: [{}]", request.getUsername());
             throw new ServiceException(String.format("Error creating user [%s]", request.getUsername()), ex);
         }
     }
@@ -120,7 +119,7 @@ public class UserService {
         LOG.info("[getAllUsers] retrieving users");
 
         try {
-            List<User> users = new ArrayList<>();
+            var users = new ArrayList<User>();
             repository.findAll().forEach(users::add);
             return users;
         } catch (Exception ex) {
