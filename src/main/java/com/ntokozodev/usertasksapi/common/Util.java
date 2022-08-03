@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Util {
-    private static final Logger LOG = LoggerFactory.getLogger("common.util");
+    private static final Logger LOG = LoggerFactory.getLogger("common.logger");
 
     public static void logException(String method, Exception ex) {
         var message = String.format("[%s] exception: { message: {}, type: {} }", method);
