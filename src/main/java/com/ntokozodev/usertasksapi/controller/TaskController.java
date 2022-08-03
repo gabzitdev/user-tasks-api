@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -34,10 +35,12 @@ public class TaskController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
     private final TaskService service;
     private final ObjectMapper mapper;
+    private final ModelMapper modelMapper;
 
-    public TaskController(TaskService taskService, ObjectMapper mapper) {
+    public TaskController(TaskService taskService, ObjectMapper mapper, ModelMapper modelMapper) {
         this.service = taskService;
         this.mapper = mapper;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping("/api/users/{id}/tasks")
@@ -45,15 +48,14 @@ public class TaskController {
         LOG.info("[createTask] request for Id: [{}] - task: [{}]", id, request.getName());
 
         try {
-            var task = service.createTask(request, parseId(id));
-            var response = createResponse(task);
-            var body = mapper.writeValueAsString(response);
-            var headers = new HttpHeaders();
+            Task task = service.createTask(request, parseId(id));
+            String body = mapper.writeValueAsString(mapTaskToResponse(task));
+            HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
             return new ResponseEntity<>(body, headers, HttpStatus.OK);
         } catch (EntityNotFoundException ex) {
-            logException("getUserById", ex);
+            logException("createTask", ex);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
             logException("createTask", ex);
@@ -62,26 +64,27 @@ public class TaskController {
     }
 
     @PutMapping("/api/users/{user_id}/tasks/{task_id}")
-    public ResponseEntity<String> updateTask(@PathVariable("user_id") String userId,
-            @PathVariable("task_id") String taskId, @RequestBody UpdateTaskRequest request) {
-        LOG.info("[updateUserTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
+    public ResponseEntity<String> updateTask(
+            @PathVariable("user_id") String userId,
+            @PathVariable("task_id") String taskId,
+            @RequestBody UpdateTaskRequest request) {
+        LOG.info("[updateTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
-            var task = service.updateUserTask(request, parseId(userId), parseId(taskId));
-            var response = createResponse(task);
-            var body = mapper.writeValueAsString(response);
+            Task task = service.updateUserTask(request, parseId(userId), parseId(taskId));
+            String body = mapper.writeValueAsString(mapTaskToResponse(task));
             var headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
             return new ResponseEntity<>(body, headers, HttpStatus.OK);
         } catch (IllegalArgumentException ex) {
-            logException("updateUserTask", ex);
+            logException("updateTask", ex);
             return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         } catch (EntityNotFoundException ex) {
-            logException("updateUserTask", ex);
+            logException("updateTask", ex);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            logException("updateUserTask", ex);
+            logException("updateTask", ex);
             return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -112,10 +115,9 @@ public class TaskController {
         LOG.info("[getTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
-            var task = service.getUserTask(parseId(userId), parseId(taskId));
-            var response = createResponse(task);
-            var body = mapper.writeValueAsString(response);
-            var headers = new HttpHeaders();
+            Task task = service.getUserTask(parseId(userId), parseId(taskId));
+            String body = mapper.writeValueAsString(mapTaskToResponse(task));
+            HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
 
             return new ResponseEntity<>(body, headers, HttpStatus.OK);
@@ -131,14 +133,14 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/api/users/{user_id}/tasks")
+    @GetMapping("/api/users/{user_id}/tasks/{page}")
     public ResponseEntity<List<TaskResponse>> getTasks(@PathVariable("user_id") String userId) {
         LOG.info("[getTasks] request for userId: [{}]", userId);
 
         try {
-            var responses = new ArrayList<TaskResponse>();
-            var tasks = service.getAllUserTasks(parseId(userId));
-            tasks.forEach(task -> responses.add(createResponse(task)));
+            List<TaskResponse> responses = new ArrayList<>();
+            List<Task> tasks = service.getUserTasks(parseId(userId));
+            tasks.forEach(task -> responses.add(mapTaskToResponse(task)));
 
             return new ResponseEntity<>(responses, HttpStatus.OK);
         } catch (Exception ex) {
@@ -147,13 +149,7 @@ public class TaskController {
         }
     }
 
-    private TaskResponse createResponse(Task task) {
-        var response = new TaskResponse();
-        response.setId(task.getId());
-        response.setName(task.getName());
-        response.setDescription(task.getDescription());
-        response.setDate_time(task.getDate_time());
-
-        return response;
+    private TaskResponse mapTaskToResponse(Task task) {
+        return modelMapper.map(task, TaskResponse.class);
     }
 }
