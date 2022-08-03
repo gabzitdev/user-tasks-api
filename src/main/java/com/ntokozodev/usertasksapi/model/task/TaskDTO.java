@@ -7,7 +7,9 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class TaskRequest {
+public class TaskDTO {
+    @NotNull
+    private long id;
     @NotNull
     private String name;
     @NotNull

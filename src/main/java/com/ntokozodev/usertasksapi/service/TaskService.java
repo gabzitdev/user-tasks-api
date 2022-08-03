@@ -6,13 +6,16 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.exception.ServiceException;
 import com.ntokozodev.usertasksapi.model.db.Task;
 import com.ntokozodev.usertasksapi.model.db.User;
-import com.ntokozodev.usertasksapi.model.task.TaskRequest;
+import com.ntokozodev.usertasksapi.model.task.TaskDTO;
 import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
 import com.ntokozodev.usertasksapi.repository.TaskRepository;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
@@ -30,7 +33,7 @@ public class TaskService {
         this.userRepository = userRepository;
     }
 
-    public Task createTask(TaskRequest request, long userId) throws ServiceException, EntityNotFoundException {
+    public Task createTask(TaskDTO request, long userId) throws ServiceException, EntityNotFoundException {
         var infoMessage = "[createTask] creating task: { name: {}, description: {}, date_time: {} }";
         LOG.info(infoMessage, request.getName(), request.getDescription(), request.getDate_time());
 
@@ -64,8 +67,8 @@ public class TaskService {
         try {
             Optional<Task> taskEntity = taskRepository.findById(taskId);
             if (taskEntity.isEmpty()) {
-                throw new EntityNotFoundException(
-                        String.format("Couldn't update task no task found for Id [%s]", taskId));
+                var message = String.format("Couldn't update task no task found for Id [%s]", taskId);
+                throw new EntityNotFoundException(message);
             }
 
             var task = taskEntity.get();
@@ -92,8 +95,8 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(
-                    String.format("Error updating task with userId [%s], taskId [%s]", userId, taskId), ex);
+            var message = String.format("Error updating task with userId [%s], taskId [%s]", userId, taskId);
+            throw new ServiceException(message, ex);
         }
     }
 
@@ -119,24 +122,47 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(
-                    String.format("Error retrieving task with userId [%s] - taskId [%s]", userId, taskId), ex);
+            var message = String.format("Error retrieving task with userId [%s] - taskId [%s]", userId, taskId);
+            throw new ServiceException(message, ex);
         }
     }
 
-    public List<Task> getAllUserTasks(long userId) throws ServiceException {
-        LOG.info("[getAllUserTasks] request for Id: [{}]", userId);
+    public List<Task> getUserTasks(long userId) throws ServiceException, EntityNotFoundException {
+        LOG.info("[getUserTasks] request for Id: [{}]", userId);
 
         try {
             Optional<User> userEntity = userRepository.findById(userId);
             if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(
-                        String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId));
+                String message = String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId);
+                throw new EntityNotFoundException(message);
             }
 
             return taskRepository.findByUser(userEntity.get());
 
         } catch (Exception ex) {
+            if (ex instanceof EntityNotFoundException) {
+                throw ex;
+            }
+            throw new ServiceException("Error retrieving all user tasks", ex);
+        }
+    }
+
+    public Page<Task> getUserTasksPaginated(long userId, int page, int size) throws ServiceException, EntityNotFoundException {
+        LOG.info("[getUserTasksPaginated] request: { userId: {}, page: {}, size: {} }", userId, page, size);
+
+        try {
+            Optional<User> userEntity = userRepository.findById(userId);
+            if (userEntity.isEmpty()) {
+                String message = String.format("Couldn't retrieve tasks, no user found for Id [%s]", userId);
+                throw new EntityNotFoundException(message);
+            }
+
+            return taskRepository.findByUser(userEntity.get(), PageRequest.of(page, size, Sort.by("id")));
+
+        } catch (Exception ex) {
+            if (ex instanceof EntityNotFoundException) {
+                throw ex;
+            }
             throw new ServiceException("Error retrieving all user tasks", ex);
         }
     }
@@ -163,8 +189,8 @@ public class TaskService {
                 throw ex;
             }
 
-            throw new ServiceException(
-                    String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId), ex);
+            String message = String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId);
+            throw new ServiceException(message, ex);
         }
     }
 }
