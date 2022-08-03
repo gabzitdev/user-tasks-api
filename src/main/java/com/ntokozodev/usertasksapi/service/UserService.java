@@ -15,7 +15,7 @@ import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.exception.ServiceException;
 import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
-import com.ntokozodev.usertasksapi.model.user.UserRequest;
+import com.ntokozodev.usertasksapi.model.user.UserDTO;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
 
 @Service
@@ -29,7 +29,7 @@ public class UserService {
         this.repository = repository;
     }
 
-    public User createUser(UserRequest request) throws ServiceException, EntityDuplicateException {
+    public User createUser(UserDTO request) throws ServiceException, EntityDuplicateException {
         var infoMessage = "[createUser] creating user: { username: {}, name: {}, surname: {} }";
         LOG.info(infoMessage, request.getUsername(), request.getFirst_name(), request.getLast_name());
 

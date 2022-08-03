@@ -7,7 +7,9 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class UserRequest {
+public class UserDTO {
+    @NotNull
+    private long id;
     @NotNull
     private String username;
     @NotNull

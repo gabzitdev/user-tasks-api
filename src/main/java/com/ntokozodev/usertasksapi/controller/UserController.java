@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,11 +26,12 @@ import com.ntokozodev.usertasksapi.exception.EntityDuplicateException;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
-import com.ntokozodev.usertasksapi.model.user.UserRequest;
+import com.ntokozodev.usertasksapi.model.user.UserDTO;
 import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.UserService;
 
 @RestController
+@RequestMapping("/api")
 public class UserController {
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
 
@@ -41,8 +43,8 @@ public class UserController {
         this.mapper = mapper;
     }
 
-    @PostMapping("/api/users")
-    public ResponseEntity<String> createUser(@Valid @RequestBody UserRequest request) {
+    @PostMapping("/users")
+    public ResponseEntity<String> createUser(@Valid @RequestBody UserDTO request) {
         LOG.info("[createUser] received request for username: [{}]", request.getUsername());
 
         try {
@@ -63,7 +65,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/api/users/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UpdateUserRequest request) {
         LOG.info("[updateUser] received request for userId: [{}]", id);
 
@@ -87,7 +89,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/api/users/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<String> getUserById(@PathVariable("id") String id) {
         LOG.info("[getUser] received request for Id: [{}]", id);
 
@@ -111,7 +113,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/api/users/{username}/username")
+    @GetMapping("/users/{username}/username")
     public ResponseEntity<String> getUserByUsername(@PathVariable("username") String username) {
         LOG.info("[getUserByUsername] received request for username: [{}]", username);
 
@@ -132,7 +134,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/api/users")
+    @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> getUsers() {
         LOG.info("[getUsers] request");
 
