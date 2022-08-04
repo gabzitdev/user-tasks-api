@@ -16,7 +16,6 @@ import com.ntokozodev.usertasksapi.exception.ServiceException;
 import com.ntokozodev.usertasksapi.model.db.Task;
 import com.ntokozodev.usertasksapi.model.db.User;
 import com.ntokozodev.usertasksapi.model.task.TaskDTO;
-import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
 import com.ntokozodev.usertasksapi.repository.TaskRepository;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
 
@@ -60,7 +59,7 @@ public class TaskService {
         }
     }
 
-    public Task updateUserTask(UpdateTaskRequest request, long userId, long taskId)
+    public Task updateUserTask(TaskDTO request, long userId, long taskId)
             throws ServiceException, EntityNotFoundException {
         LOG.info("[updateUser] updating task with userId: [{}], taskId: [{}]", userId, taskId);
 
@@ -147,7 +146,8 @@ public class TaskService {
         }
     }
 
-    public Page<Task> getUserTasksPaginated(long userId, int page, int size) throws ServiceException, EntityNotFoundException {
+    public Page<Task> getUserTasksPaginated(long userId, int page, int size)
+            throws ServiceException, EntityNotFoundException {
         LOG.info("[getUserTasksPaginated] request: { userId: {}, page: {}, size: {} }", userId, page, size);
 
         try {

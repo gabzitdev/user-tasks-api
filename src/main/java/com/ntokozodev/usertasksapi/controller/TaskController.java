@@ -9,10 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import com.ntokozodev.usertasksapi.common.Constants;
-import com.ntokozodev.usertasksapi.exception.ServiceException;
-import com.ntokozodev.usertasksapi.model.Paging;
-import com.ntokozodev.usertasksapi.model.task.TaskDTO;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +17,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ntokozodev.usertasksapi.common.Constants;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
+import com.ntokozodev.usertasksapi.exception.ServiceException;
+import com.ntokozodev.usertasksapi.model.Paging;
 import com.ntokozodev.usertasksapi.model.db.Task;
+import com.ntokozodev.usertasksapi.model.task.TaskDTO;
 import com.ntokozodev.usertasksapi.model.task.TaskResponse;
-import com.ntokozodev.usertasksapi.model.task.UpdateTaskRequest;
 import com.ntokozodev.usertasksapi.service.TaskService;
 
 @RestController
@@ -69,7 +76,7 @@ public class TaskController {
     public ResponseEntity<String> updateTask(
             @PathVariable("user_id") String userId,
             @PathVariable("task_id") String taskId,
-            @RequestBody UpdateTaskRequest request) {
+            @RequestBody TaskDTO request) {
         LOG.info("[updateTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -93,7 +100,7 @@ public class TaskController {
 
     @DeleteMapping("/users/{user_id}/tasks/{task_id}")
     public ResponseEntity<String> deleteTask(@PathVariable("user_id") String userId,
-                                             @PathVariable("task_id") String taskId) {
+            @PathVariable("task_id") String taskId) {
         LOG.info("[deleteTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -113,7 +120,7 @@ public class TaskController {
 
     @GetMapping("/users/{user_id}/tasks/{task_id}")
     public ResponseEntity<String> getTask(@PathVariable("user_id") String userId,
-                                          @PathVariable("task_id") String taskId) {
+            @PathVariable("task_id") String taskId) {
         LOG.info("[getTask] request for userId: [{}] - taskId: [{}]", userId, taskId);
 
         try {
@@ -163,7 +170,8 @@ public class TaskController {
         }
     }
 
-    private ResponseEntity<TaskResponse> getResponseWithPaging(String userId, Integer page, int size) throws ServiceException, EntityNotFoundException {
+    private ResponseEntity<TaskResponse> getResponseWithPaging(String userId, Integer page, int size)
+            throws ServiceException, EntityNotFoundException {
         LOG.info("[getTasks] request for userId: [{}] | page: [{}]", userId, page);
         Page<Task> pages = service.getUserTasksPaginated(parseId(userId), page, size);
         List<Task> tasks = pages.getContent();
