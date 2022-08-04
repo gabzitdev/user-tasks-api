@@ -9,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.ntokozodev.usertasksapi.common.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,6 +27,7 @@ public class Task implements Serializable {
     private String name;
     private String date_time;
     private String description;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

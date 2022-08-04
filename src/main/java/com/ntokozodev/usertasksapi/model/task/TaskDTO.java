@@ -1,5 +1,6 @@
 package com.ntokozodev.usertasksapi.model.task;
 
+import com.ntokozodev.usertasksapi.common.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,5 @@ public class TaskDTO {
     private String description;
     @NotNull
     private String date_time;
+    private Status status;
 }

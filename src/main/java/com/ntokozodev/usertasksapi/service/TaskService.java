@@ -3,6 +3,7 @@ package com.ntokozodev.usertasksapi.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.ntokozodev.usertasksapi.common.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class TaskService {
     }
 
     public Task createTask(TaskDTO request, long userId) throws ServiceException, EntityNotFoundException {
-        var infoMessage = "[createTask] creating task: { name: {}, description: {}, date_time: {} }";
+        String infoMessage = "[createTask] creating task: { name: {}, description: {}, date_time: {} }";
         LOG.info(infoMessage, request.getName(), request.getDescription(), request.getDate_time());
 
         try {
@@ -43,11 +44,12 @@ public class TaskService {
                         String.format("Couldn't create task no user found for Id [%s]", userId));
             }
 
-            var task = new Task();
+            Task task = new Task();
             task.setName(request.getName());
             task.setDescription(request.getDescription());
             task.setDate_time(request.getDate_time());
             task.setUser(userEntity.get());
+            task.setStatus(Status.PENDING);
 
             return taskRepository.save(task);
         } catch (Exception ex) {
