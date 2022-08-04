@@ -14,7 +14,6 @@ import com.ntokozodev.usertasksapi.exception.EntityDuplicateException;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.exception.ServiceException;
 import com.ntokozodev.usertasksapi.model.db.User;
-import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserDTO;
 import com.ntokozodev.usertasksapi.repository.UserRepository;
 
@@ -48,7 +47,7 @@ public class UserService {
         }
     }
 
-    public User updateUser(UpdateUserRequest request, long userId) throws ServiceException, EntityNotFoundException {
+    public User updateUser(UserDTO request, long userId) throws ServiceException, EntityNotFoundException {
         LOG.info("[updateUser] updating user with id: [{}]", userId);
 
         try {
@@ -58,7 +57,6 @@ public class UserService {
             }
 
             User user = entity.get();
-            // For large objects could probably consider an auto mapper
             if (request.getFirst_name() != null) {
                 user.setFirst_name(request.getFirst_name());
             }
@@ -115,7 +113,6 @@ public class UserService {
         }
     }
 
-    // TODO: Paging
     public List<User> getAllUsers() throws ServiceException {
         LOG.info("[getAllUsers] retrieving users");
 

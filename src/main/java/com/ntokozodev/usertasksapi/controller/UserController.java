@@ -25,9 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ntokozodev.usertasksapi.exception.EntityDuplicateException;
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
 import com.ntokozodev.usertasksapi.model.db.User;
-import com.ntokozodev.usertasksapi.model.user.UpdateUserRequest;
 import com.ntokozodev.usertasksapi.model.user.UserDTO;
-import com.ntokozodev.usertasksapi.model.user.UserResponse;
 import com.ntokozodev.usertasksapi.service.UserService;
 
 @RestController
@@ -66,7 +64,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UpdateUserRequest request) {
+    public ResponseEntity<String> updateUser(@PathVariable("id") String id, @RequestBody UserDTO request) {
         LOG.info("[updateUser] received request for userId: [{}]", id);
 
         try {
@@ -135,11 +133,11 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserResponse>> getUsers() {
+    public ResponseEntity<List<UserDTO>> getUsers() {
         LOG.info("[getUsers] request");
 
         try {
-            var responses = new ArrayList<UserResponse>();
+            var responses = new ArrayList<UserDTO>();
             var users = userService.getAllUsers();
             users.forEach(user -> responses.add(createResponse(user)));
 
@@ -150,8 +148,8 @@ public class UserController {
         }
     }
 
-    private UserResponse createResponse(User user) {
-        var response = new UserResponse();
+    private UserDTO createResponse(User user) {
+        var response = new UserDTO();
         response.setId(user.getId());
         response.setFirst_name(user.getFirst_name());
         response.setLast_name(user.getLast_name());
