@@ -8,6 +8,7 @@
 - Inside root folder execute maven command `java -jar target/user-tasks-api-1.0.0.jar`
 - All endpoints will be running at `http://localhost:8080/api/...`
 - Get all tasks with paging from `localhost:8080/api/users/1/tasks?page=0`
+- Postman collection `src/main/resources/api.postman_collection.json`
 
 ### Database
 - App uses H2 in memory database
