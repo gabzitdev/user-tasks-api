@@ -1,5 +1,7 @@
 package com.ntokozodev.usertasksapi.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,27 +35,26 @@ public class TaskService {
         this.userRepository = userRepository;
     }
 
-    public Task createTask(TaskDTO request, long userId) throws ServiceException, EntityNotFoundException {
+    public Task createTask(TaskDTO request, long userId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
         String infoMessage = "[createTask] creating task: { name: {}, description: {}, date_time: {} }";
         LOG.info(infoMessage, request.getName(), request.getDescription(), request.getDate_time());
 
         try {
             Optional<User> userEntity = userRepository.findById(userId);
             if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(
-                        String.format("Couldn't create task no user found for Id [%s]", userId));
+                throw new EntityNotFoundException(String.format("Couldn't create task no user found for Id [%s]", userId));
             }
 
             Task task = new Task();
             task.setName(request.getName());
             task.setDescription(request.getDescription());
-            task.setDate_time(request.getDate_time());
+            task.setDate_time(parseDate(request.getDate_time()));
             task.setUser(userEntity.get());
             task.setStatus(Status.PENDING);
 
             return taskRepository.save(task);
         } catch (Exception ex) {
-            if (ex instanceof EntityNotFoundException) {
+            if (ex instanceof EntityNotFoundException || ex instanceof IllegalArgumentException) {
                 throw ex;
             }
 
@@ -62,7 +63,7 @@ public class TaskService {
     }
 
     public Task updateUserTask(TaskDTO request, long userId, long taskId)
-            throws ServiceException, EntityNotFoundException {
+            throws ServiceException, EntityNotFoundException, IllegalArgumentException {
         LOG.info("[updateUser] updating task with userId: [{}], taskId: [{}]", userId, taskId);
 
         try {
@@ -86,13 +87,13 @@ public class TaskService {
             }
 
             if (request.getDate_time() != null) {
-                task.setDate_time(request.getDate_time());
+                task.setDate_time(parseDate(request.getDate_time()));
             }
 
             return taskRepository.save(task);
 
         } catch (Exception ex) {
-            if (ex instanceof EntityNotFoundException || ex instanceof ServiceException) {
+            if (ex instanceof EntityNotFoundException || ex instanceof IllegalArgumentException) {
                 throw ex;
             }
 
@@ -193,6 +194,15 @@ public class TaskService {
 
             String message = String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId);
             throw new ServiceException(message, ex);
+        }
+    }
+
+    private LocalDateTime parseDate(String date) {
+        try {
+            LOG.info("[parseDate] parsing string date: [{}]", date);
+            return LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(String.format("[parseDate] couldn't parse date string: [%s]", date), ex);
         }
     }
 }
