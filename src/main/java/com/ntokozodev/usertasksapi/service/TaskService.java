@@ -1,9 +1,10 @@
 package com.ntokozodev.usertasksapi.service;
 
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.ntokozodev.usertasksapi.common.Status;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.ntokozodev.usertasksapi.exception.EntityNotFoundException;
@@ -195,6 +197,20 @@ public class TaskService {
             String message = String.format("Error deleting task with userId [%s] - taskId [%s]", userId, taskId);
             throw new ServiceException(message, ex);
         }
+    }
+
+    @Scheduled(cron = "0 */1 * ? * *")
+    public void scheduleStatusUpdate() {
+        var pendingTasks = taskRepository.findByStatus(Status.PENDING);
+        LOG.info("[scheduleStatusUpdate] total pending tasks: [{}]", pendingTasks.size());
+        List<Task> passed = pendingTasks.stream().map(this::completeTask).collect(Collectors.toList());
+        taskRepository.saveAll(passed);
+    }
+
+    private Task completeTask(Task task) {
+        LOG.info("[completeTask] tasks: [{}], date: [{}] has passed", task.getName(), task.getDate_time());
+        task.setStatus(Status.DONE);
+        return  task;
     }
 
     private LocalDateTime parseDate(String date) {
