@@ -230,7 +230,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"ntokozoz\",\n    \"description\": \"Ntokozo\",\n    \"date_time\": \"Dev\"\n}",
+					"raw": "{\n    \"name\": \"foo\",\n    \"description\": \"Ntokozo\",\n    \"date_time\": \"Dev\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
