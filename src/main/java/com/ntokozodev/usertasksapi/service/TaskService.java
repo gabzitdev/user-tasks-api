@@ -37,14 +37,16 @@ public class TaskService {
         this.userRepository = userRepository;
     }
 
-    public Task createTask(TaskDTO request, long userId) throws ServiceException, EntityNotFoundException, IllegalArgumentException {
+    public Task createTask(TaskDTO request, long userId)
+            throws ServiceException, EntityNotFoundException, IllegalArgumentException {
         String infoMessage = "[createTask] creating task: { name: {}, description: {}, date_time: {} }";
         LOG.info(infoMessage, request.getName(), request.getDescription(), request.getDate_time());
 
         try {
             Optional<User> userEntity = userRepository.findById(userId);
             if (userEntity.isEmpty()) {
-                throw new EntityNotFoundException(String.format("Couldn't create task no user found for Id [%s]", userId));
+                throw new EntityNotFoundException(
+                        String.format("Couldn't create task no user found for Id [%s]", userId));
             }
 
             Task task = new Task();
@@ -203,14 +205,24 @@ public class TaskService {
     public void scheduleStatusUpdate() {
         var pendingTasks = taskRepository.findByStatus(Status.PENDING);
         LOG.info("[scheduleStatusUpdate] total pending tasks: [{}]", pendingTasks.size());
-        List<Task> passed = pendingTasks.stream().map(this::completeTask).collect(Collectors.toList());
-        taskRepository.saveAll(passed);
+        List<Task> completed = pendingTasks
+                .parallelStream()
+                .filter(this::isTaskDatePassed)
+                .map(this::completeTask)
+                .collect(Collectors.toList());
+        LOG.info("[scheduleStatusUpdate] total completed tasks: [{}]", completed.size());
+        taskRepository.saveAll(completed);
+    }
+
+    private boolean isTaskDatePassed(Task task) {
+        LOG.info("[isTaskDatePassed] checking task: [{}] date: [{}]", task.getName(), task.getDate_time());
+        return task.getDate_time().isBefore(LocalDateTime.now());
     }
 
     private Task completeTask(Task task) {
         LOG.info("[completeTask] tasks: [{}], date: [{}] has passed", task.getName(), task.getDate_time());
         task.setStatus(Status.DONE);
-        return  task;
+        return task;
     }
 
     private LocalDateTime parseDate(String date) {

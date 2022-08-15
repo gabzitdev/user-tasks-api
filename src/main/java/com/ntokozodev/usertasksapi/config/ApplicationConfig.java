@@ -18,8 +18,10 @@ public class ApplicationConfig {
         var modelMapper = new ModelMapper();
 
         modelMapper.getConfiguration().setSkipNullEnabled(true);
-        modelMapper.typeMap(Task.class, TaskDTO.class)
-                .addMappings(mapper -> mapper.using(dateTimeStringConverter()).map(Task::getDate_time, TaskDTO::setDate_time));
+        modelMapper
+            .typeMap(Task.class, TaskDTO.class)
+            .addMappings(mapper -> mapper.using(dateTimeStringConverter())
+            .map(Task::getDate_time, TaskDTO::setDate_time));
 
         return modelMapper;
     }
